@@ -20,7 +20,6 @@ Otherwise, if your focus is to learn about Spring Cloud Task, choose one at rand
 
 To use Docker Compose to start Postgres:
 ```shell
-cp pom-docker-compose.xml pom.xml
 ./mvnw spring-boot:run
 ```
 
@@ -42,7 +41,6 @@ PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -w
 
 To use Testcontainers for Dev Time to start Postgres:
 ```shell
-cp pom-testcontainers.xml pom.xml
 ./mvnw spring-boot:test-run
 ```
 
@@ -50,6 +48,7 @@ Notice the container is configured to remain running after the Task has complete
 (See [application.properties in src/test](src/test/resources/application.properties)).
 ```shell
 # In src/test/resources/application.properties
+spring.docker.compose.lifecycle-management=none
 my.testcontainers.reuse.enabled=true
 ```
 
