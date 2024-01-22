@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableTask
-public class SpringCloudTaskDemoApplication {
+public class Application {
 
 	@Bean
 	public ApplicationRunner applicationRunner() {
@@ -17,7 +17,7 @@ public class SpringCloudTaskDemoApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringCloudTaskDemoApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 
 	public static class SpringCloudTaskDemoApplicationRunner implements ApplicationRunner {

@@ -2,8 +2,6 @@
 
 This repo contains basic functionality of Spring Cloud Task.
 
-It also contains two ways to start a Postgres database for Spring Cloud Task, Docker Compose and Testcontainers for Development Time.
-
 ## Usage Instructions
 
 Steps:
@@ -12,65 +10,35 @@ Steps:
 
 ### Step 1. Run the application
 
-You can use either option below.
-If you are curious about using Docker Compose vs Testcontainers to start backend containers during development, you can take a closer look at the options.
-Otherwise, if your focus is to learn about Spring Cloud Task, choose one at random and move on to step 2.
+The application uses Spring Boot's support for Docker Compose to automatically start a Postgres database on the local Docker daemon.
 
-#### Option 1: Using Docker Compose to start the required database container
-
-To use Docker Compose to start Postgres:
+Run the application.
+It will complete the task and shut itself down.
 ```shell
 ./mvnw spring-boot:run
 ```
 
 Notice the container is configured to remain running after the Task has completed.
-(See [application.properties in src/main](src/main/resources/application.properties)). 
-```shell
+(See [application.properties](src/main/resources/application.properties)). 
+```properties
 # In src/main/resources/application.properties
 spring.docker.compose.lifecycle-management=start_only
 ```
 
-After the Task has completed, the application will shut down.
-You can connect to the database from the command line using the `psql` CLI as follows.
-Notice that the configuration details match those configured in [docker-compose.yml](docker-compose.yml).
+After the Task has completed and the application has shut down, connect to the database and check the results.
+You can use your IDE (see connection details in [docker-compose.yml](docker-compose.yml)), or you can connect from the command line using the `psql` CLI as follows.
 ```shell
 PGPASSWORD=postgres psql -h localhost -p 5432 -d postgres -U postgres -w
 ```
-
-#### Option 2: Using Testcontainers for Dev Time to start the required database container
-
-To use Testcontainers for Dev Time to start Postgres:
-```shell
-./mvnw spring-boot:test-run
-```
-
-Notice the container is configured to remain running after the Task has completed.
-(See [application.properties in src/test](src/test/resources/application.properties)).
-```shell
-# In src/test/resources/application.properties
-spring.docker.compose.lifecycle-management=none
-my.testcontainers.reuse.enabled=true
-```
-
-After the Task has completed, the application will shut down.
-You can connect to the database from the command line using the `psql` CLI as follows.
-> Note: In this case, the command uses the default values ("test") provided by Testcontainers for all parameters except for the port.
-> You need to examine the application log file and obtain the port, which is dynamically mapped to an unused port on your local machine.
-> Look for the JDBC URL printed to the log file and use that port in te command below.
-The port is match those configured in [docker-compose.yml](docker-compose.yml).
-```shell
-PGPASSWORD=test psql -h localhost -p 57296 -d test -U test -w
-```
-
 ### Step 2. View the results of in the database
 
 Inside the `psql` shell, type `\z` to see the list of tables.
 
-```shell
+```sql
 psql (16.1)
 Type "help" for help.
 
-test=# \z
+postgres=# \z
                                       Access privileges
  Schema |         Name          |   Type   | Access privileges | Column privileges | Policies 
 --------+-----------------------+----------+-------------------+-------------------+----------
@@ -82,4 +50,14 @@ test=# \z
 (5 rows)
 ```
 
-You can further explore the contents with SQL queries.
+Check the list of executions using the `select` statement shown below.
+This list of task executions should grow by one every time you run the app.
+```sql
+postgres=# select * from task_execution;
+task_execution_id |         start_time         |         end_time          |       task_name        | exit_code | exit_message | error_message |        last_updated        | external_execution_id | parent_execution_id 
+-------------------+----------------------------+---------------------------+------------------------+-----------+--------------+---------------+----------------------------+-----------------------+---------------------
+                 1 | 2024-01-22 13:16:13.166464 | 2024-01-22 13:16:13.19172 | spring-cloud-task-demo |         0 |              |               | 2024-01-22 13:16:13.210635 |                       |                    
+(1 row)
+```
+
+Type `quit` to exit the psql shell.
